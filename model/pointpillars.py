@@ -219,10 +219,10 @@ class Head(nn.Module):
 
 class PointPillars(nn.Module):
     def __init__(self,
-                 nclasses=3, 
+                 nclasses=1, 
                  voxel_size=[0.16, 0.16, 4],
                  point_cloud_range=[0, -39.68, -3, 69.12, 39.68, 1],
-                 max_num_points=32,
+                 max_num_points=64,
                  max_voxels=(16000, 40000)):
         super().__init__()
         self.nclasses = nclasses
@@ -243,22 +243,18 @@ class PointPillars(nn.Module):
         self.head = Head(in_channel=384, n_anchors=2*nclasses, n_classes=nclasses)
         
         # anchors
-        ranges = [[0, -39.68, -0.6, 69.12, 39.68, -0.6],
-                    [0, -39.68, -0.6, 69.12, 39.68, -0.6],
-                    [0, -39.68, -1.78, 69.12, 39.68, -1.78]]
-        sizes = [[0.6, 0.8, 1.73], [0.6, 1.76, 1.73], [1.6, 3.9, 1.56]]
+        ranges = [[0, -39.68, -0.6, 69.12, 39.68, -0.6]]
+        sizes = [[0.6, 0.6, 1]]
+        # ranges = [[0, -39.68, -0.8, 69.12, 39.68, -0.8]]
+        # sizes = [[0.5, 0.5, 0.8]]
         rotations=[0, 1.57]
         self.anchors_generator = Anchors(ranges=ranges, 
                                          sizes=sizes, 
                                          rotations=rotations)
         
         # train
-        self.assigners = [
-            {'pos_iou_thr': 0.5, 'neg_iou_thr': 0.35, 'min_iou_thr': 0.35},
-            {'pos_iou_thr': 0.5, 'neg_iou_thr': 0.35, 'min_iou_thr': 0.35},
-            {'pos_iou_thr': 0.6, 'neg_iou_thr': 0.45, 'min_iou_thr': 0.45},
-        ]
-
+        #self.assigners = [{'pos_iou_thr': 0.5, 'neg_iou_thr': 0.35, 'min_iou_thr': 0.35}]
+        self.assigners = [{'pos_iou_thr': 0.40, 'neg_iou_thr': 0.35, 'min_iou_thr': 0.35},]
         # val and test
         self.nms_pre = 100
         self.nms_thr = 0.01
